@@ -8,3 +8,8 @@ globals "terraform" "providers" "azurerm" {
     subscription_id = ""
   }
 }
+
+globals {
+  environment = "dev"
+}
+

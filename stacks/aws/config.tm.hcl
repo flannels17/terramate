@@ -8,8 +8,8 @@ globals "terraform" "providers" "aws" {
   }
 }
 
-# globals "terraform" "providers" "aws.east-1" {
-#   config = {
-#     region = "us-east-1"
-#   }
-# }
+globals "terraform" "providers" "aws.east-1" {
+  config = {
+    region = "us-east-1"
+  }
+}

@@ -1,5 +1,5 @@
 stack {
   name        = "opensearch"
   description = "opensearch"
-  id          = "847ee7f1-9fb8-422f-9ac1-372640fa553a"
+  id          = "315fe2c4-eefa-4bb8-bc59-3d0653efdd9a"
 }
