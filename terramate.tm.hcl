@@ -12,7 +12,7 @@ terramate {
 
     run {
       env {
-        TF_PLUGIN_CACHE_DIR = "${terramate.root.path.fs.absolut}/.terraform-cache-dir"
+        TF_PLUGIN_CACHE_DIR = "${terramate.root.path.fs.absolute}/.terraform-cache-dir"
       }
     }
   }
