@@ -1,4 +1,4 @@
-generate_hcl "backend.tf" {
+generate_hcl "_backend.tf" {
   content {
     terraform {
       backend "s3" {

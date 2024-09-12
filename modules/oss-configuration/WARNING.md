@@ -1,0 +1,1 @@
+Please note that this folder contains some ndjson files which cannot be installed by the Opensearch provider just yet. They require manual steps as documented in https://teamwork.brusselsairport.be/display/ICTCF/Deploying+a+cluster.

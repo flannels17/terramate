@@ -5,7 +5,7 @@ generate_hcl "_providers.tf" {
         source  = content.source
         version = content.version
         } if tm_alltrue([
-          tm_try(v.enabled, true),
+          tm_try(content.enabled, true),
           tm_length(tm_split(".", provider)) == 1,
       ])
     }
