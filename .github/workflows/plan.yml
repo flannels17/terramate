@@ -50,7 +50,9 @@ jobs:
       - name: Plan Terraform changes in changed stacks
         if: steps.list.outputs.stdout
         run: |
-          terramate run --parallel 5 --changed --continue-on-error -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+          # terramate run --parallel 5 --changed --continue-on-error -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+
+          terramate run --parallel 5 --changed --continue-on-error -- terraform plan -out out.tfplan
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
