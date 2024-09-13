@@ -100,32 +100,9 @@ jobs:
           echo >>pr-comment.txt '```'
           cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
 
-      - name: Generate preview when no stacks changed
-        if: success() && !steps.list.outputs.stdout
-        run: |
-          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt 'No changed stacks, no detailed preview will be generated.'
-          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
-
-      - name: Generate preview when things failed
-        if: failure()
-        run: |
-          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt '```bash'
-          echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
-          echo >>pr-comment.txt '```'
-          echo >>pr-comment.txt ':boom: Generating preview failed. Please see details in Actions output.'
-          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
-
       - name: Publish generated preview as GitHub commnent
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          header: preview
+          header: terraform plan
           path: pr-comment.txt
