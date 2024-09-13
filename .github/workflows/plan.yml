@@ -68,7 +68,7 @@ jobs:
           terramate run --changed -- infracost breakdown \
             --path ./out.tfplan \
             --format=json \
-            # --usage-file infracost-usage-medium.yml \
+            --usage-file infracost-usage-medium.yml \
             --out-file=./infracost-base.json
 
       - name: Post Infracost comment
@@ -80,52 +80,52 @@ jobs:
             --pull-request=${{github.event.pull_request.number}} \
             --behavior=new
 
-      - name: Generate preview details
-        if: steps.list.outputs.stdout
-        id: comment
-        run: |
-          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt '```bash'
-          echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
-          echo >>pr-comment.txt '```'
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "#### Terraform Plan"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt '```terraform'
-          terramate run --changed -- terraform show -no-color out.tfplan |& dd bs=1024 count=248 >>pr-comment.txt
-          [ "${PIPESTATUS[0]}" == "141" ] && sed -i 's/#### Terraform Plan/#### :warning: Terraform Plan truncated: please check console output :warning:/' pr-comment.txt
-          echo >>pr-comment.txt '```'
-          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
-
-      - name: Generate preview when no stacks changed
-        if: success() && !steps.list.outputs.stdout
-        run: |
-          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt 'No changed stacks, no detailed preview will be generated.'
-          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
-
-      - name: Generate preview when things failed
-        if: failure()
-        run: |
-          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt '```bash'
-          echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
-          echo >>pr-comment.txt '```'
-          echo >>pr-comment.txt ':boom: Generating preview failed. Please see details in Actions output.'
-          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
-
-      - name: Publish generated preview as GitHub commnent
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          header: preview
-          path: pr-comment.txt
+      # - name: Generate preview details
+      #   if: steps.list.outputs.stdout
+      #   id: comment
+      #   run: |
+      #     echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
+      #     echo >>pr-comment.txt
+      #     echo >>pr-comment.txt "### Changed Stacks"
+      #     echo >>pr-comment.txt
+      #     echo >>pr-comment.txt '```bash'
+      #     echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
+      #     echo >>pr-comment.txt '```'
+      #     echo >>pr-comment.txt
+      #     echo >>pr-comment.txt "#### Terraform Plan"
+      #     echo >>pr-comment.txt
+      #     echo >>pr-comment.txt '```terraform'
+      #     terramate run --changed -- terraform show -no-color out.tfplan |& dd bs=1024 count=248 >>pr-comment.txt
+      #     [ "${PIPESTATUS[0]}" == "141" ] && sed -i 's/#### Terraform Plan/#### :warning: Terraform Plan truncated: please check console output :warning:/' pr-comment.txt
+      #     echo >>pr-comment.txt '```'
+      #     cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
+      #
+      # - name: Generate preview when no stacks changed
+      #   if: success() && !steps.list.outputs.stdout
+      #   run: |
+      #     echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
+      #     echo >>pr-comment.txt
+      #     echo >>pr-comment.txt "### Changed Stacks"
+      #     echo >>pr-comment.txt
+      #     echo >>pr-comment.txt 'No changed stacks, no detailed preview will be generated.'
+      #     cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
+      #
+      # - name: Generate preview when things failed
+      #   if: failure()
+      #   run: |
+      #     echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
+      #     echo >>pr-comment.txt
+      #     echo >>pr-comment.txt "### Changed Stacks"
+      #     echo >>pr-comment.txt
+      #     echo >>pr-comment.txt '```bash'
+      #     echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
+      #     echo >>pr-comment.txt '```'
+      #     echo >>pr-comment.txt ':boom: Generating preview failed. Please see details in Actions output.'
+      #     cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
+      #
+      # - name: Publish generated preview as GitHub commnent
+      #   uses: marocchino/sticky-pull-request-comment@v2
+      #   with:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     header: preview
+      #     path: pr-comment.txt
