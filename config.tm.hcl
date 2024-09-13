@@ -4,5 +4,5 @@ globals "terraform" {
 
 globals "terraform" "backend" "s3" {
   region = "eu-west-1"
-  bucket = "bac-terramate-example-terraform-state-backend"
+  bucket = "bac-terramate-demo-backend"
 }
