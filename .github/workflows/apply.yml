@@ -29,7 +29,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.7.4
+          terraform_version: 1.7.5
           terraform_wrapper: false
 
       # Check for changed stacks
@@ -40,12 +40,12 @@ jobs:
 
       # Configure cloud credentials
 
-      - name: Configure AWS credentials via OIDC
+      - name: Configure AWS credentials
         if: steps.list.outputs.stdout
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: "CHANGEME: AWS REGION"
-          role-to-assume: "CHANGEME: IAM ROLE ARN"
+          aws-region: eu-west-1
+          role-to-assume: arn:aws:iam::942123856864:role/github-oidc-provider-aws
 
       # Run the Terraform deployment via Terramate in each changed stack
 
