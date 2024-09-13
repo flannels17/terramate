@@ -39,6 +39,12 @@ jobs:
           aws-region: eu-west-1
           role-to-assume: arn:aws:iam::942123856864:role/github-oidc-provider-aws
 
+      - name: Setup Infracost
+        if: steps.list.outputs.stdout
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
       - name: Initialize Terraform in changed stacks
         if: steps.list.outputs.stdout
         run: terramate run --parallel 1 --changed -- terraform init -lock-timeout=5m
@@ -50,17 +56,35 @@ jobs:
       - name: Plan Terraform changes in changed stacks
         if: steps.list.outputs.stdout
         run: |
-          terramate run --parallel 5 --changed --sync-preview --terraform-plan-file=out.tfplan --debug-preview-url preview_url.txt --continue-on-error -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+          # terramate run --parallel 5 --changed --continue-on-error -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+
+          terramate run --parallel 5 --changed --continue-on-error -- terraform plan -out out.tfplan
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Generate Infracost cost estimate baseline
+        if: steps.list.outputs.stdout
+        run: |
+          terramate run --changed -- infracost breakdown \
+            --path ./out.tfplan \
+            --format=json \
+            --usage-file infracost-usage.yml \
+            --out-file=./infracost-base.json
+
+      - name: Post Infracost comment
+        run: |
+          terramate run --changed -- infracost comment github \
+            --path=./infracost-base.json \
+            --repo=$GITHUB_REPOSITORY \
+            --github-token=${{github.token}} \
+            --pull-request=${{github.event.pull_request.number}} \
+            --behavior=hide-and-new
 
       - name: Generate preview details
         if: steps.list.outputs.stdout
         id: comment
         run: |
           echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat preview_url.txt))"
           echo >>pr-comment.txt
           echo >>pr-comment.txt "### Changed Stacks"
           echo >>pr-comment.txt
@@ -76,34 +100,9 @@ jobs:
           echo >>pr-comment.txt '```'
           cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
 
-      - name: Generate preview when no stacks changed
-        if: success() && !steps.list.outputs.stdout
-        run: |
-          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt 'No changed stacks, no detailed preview will be generated.'
-          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
-
-      - name: Generate preview when things failed
-        if: failure()
-        run: |
-          echo >>pr-comment.txt "## Preview of Terraform changes in ${{ github.event.pull_request.head.sha }}"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "[:mag: View Details on Terramate Cloud]($(cat preview_url.txt))"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt "### Changed Stacks"
-          echo >>pr-comment.txt
-          echo >>pr-comment.txt '```bash'
-          echo >>pr-comment.txt "${{ steps.list.outputs.stdout }}"
-          echo >>pr-comment.txt '```'
-          echo >>pr-comment.txt ':boom: Generating preview failed. Please see details in Actions output.'
-          cat pr-comment.txt >>$GITHUB_STEP_SUMMARY
-
       - name: Publish generated preview as GitHub commnent
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          header: preview
+          header: terraform plan
           path: pr-comment.txt
