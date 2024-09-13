@@ -10,6 +10,10 @@ terramate {
       "scripts"
     ]
 
+    disable_safeguards = [
+      "git-untracked"
+    ]
+
     run {
       env {
         TF_PLUGIN_CACHE_DIR = "${terramate.root.path.fs.absolute}/.terraform-cache-dir"
