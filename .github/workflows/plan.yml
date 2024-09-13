@@ -21,6 +21,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.5"
+          terraform_wrapper: false
 
       - name: Install Terramate
         uses: terramate-io/terramate-action@v1
@@ -28,11 +29,27 @@ jobs:
           version: "0.10.2"
 
       - name: List changed stacks
-        # id: list
+        id: list
         run: terramate list --changed
 
       - name: Configure AWS credentials
+        if: steps.list.outputs.stdout
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
           role-to-assume: arn:aws:iam::942123856864:role/github-oidc-provider-aws
+
+      - name: Initialize Terraform in changed stacks
+        if: steps.list.outputs.stdout
+        run: terramate run --parallel 1 --changed -- terraform init -lock-timeout=5m
+
+      - name: Validate Terraform configuration in changed stacks
+        if: steps.list.outputs.stdout
+        run: terramate run --parallel 5 --changed -- terraform validate
+
+      - name: Plan Terraform changes in changed stacks
+        if: steps.list.outputs.stdout
+        run: |
+          terramate run --parallel 5 --changed --sync-preview --terraform-plan-file=out.tfplan --debug-preview-url preview_url.txt --continue-on-error -- terraform plan -out out.tfplan -detailed-exitcode -lock=false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
