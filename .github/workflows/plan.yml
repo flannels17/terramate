@@ -78,7 +78,7 @@ jobs:
             --repo=$GITHUB_REPOSITORY \
             --github-token=${{github.token}} \
             --pull-request=${{github.event.pull_request.number}} \
-            --behavior=delete-and-new
+            --behavior=update
 
       - name: Generate preview details
         if: steps.list.outputs.stdout
