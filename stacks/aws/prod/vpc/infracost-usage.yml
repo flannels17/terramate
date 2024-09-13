@@ -1,0 +1,4 @@
+version: 0.1
+resource_type_default_usage:
+  aws_nat_gateway:
+    monthly_data_processed_gb: 1000 # Monthly data processed by the NAT Gateway in GB.

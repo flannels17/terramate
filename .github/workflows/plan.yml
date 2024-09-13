@@ -67,8 +67,8 @@ jobs:
         run: |
           terramate run --changed -- infracost breakdown \
             --path ./out.tfplan \
-            # --format=json \
-            # --usage-file infracost-usage-medium.yml \
+            --format=json \
+            --usage-file infracost-usage.yml \
             --out-file=./infracost-base.json
 
       - name: Post Infracost comment
