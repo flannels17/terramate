@@ -11,7 +11,7 @@ terramate {
     ]
 
     disable_safeguards = [
-      "git-untracked"
+      # "git-untracked"
     ]
 
     run {
